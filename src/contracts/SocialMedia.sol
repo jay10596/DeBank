@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SocialMedia {
+contract DeBank {
     // State variables
     string public name;
     uint public postCount = 0; 
@@ -37,7 +37,7 @@ contract SocialMedia {
     );
 
     constructor() {
-        name = "An Etherium based Social Media";
+        name = "A Decentralized Bank";
 
         // Create a default post
         createPost("This is a Default Post", "", 0);

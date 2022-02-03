@@ -1,6 +1,6 @@
 /* eslint-disable no-undef */
-const SocialMedia = artifacts.require("SocialMedia");
+const DeBank = artifacts.require("DeBank");
 
 module.exports = function (deployer) {
-    deployer.deploy(SocialMedia);
+    deployer.deploy(DeBank);
 };

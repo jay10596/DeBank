@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const SocialMedia = artifacts.require("SocialMedia")
+const DeBank = artifacts.require("DeBank")
 
 // Required for Failure tests (should.be.rejected)
 require('chai')
@@ -30,7 +30,7 @@ contract(SocialMedia, ([deployer, author, reader]) => {
             const name = await socialMedia.name()
 
             // SUCCESS: SocialMedia has correct name
-            assert.equal(name, 'An Etherium based Social Media')
+            assert.equal(name, 'A Decentralized Bank')
             assert.notEqual(name, 0x0)
             assert.notEqual(name, '')
             assert.notEqual(name, null)

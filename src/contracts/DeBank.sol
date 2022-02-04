@@ -1,83 +1,50 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import './Token.sol';
+
 contract DeBank {
     // State variables
-    string public name;
-    uint public postCount = 0; 
+    Token private token;    
 
     // Equivalent to database
-    struct Post {
-        uint id;
-        string content;
-        string mediaHash;
-        uint tip;
-        address author;
+    struct Account {
+        address id;
+        uint balance;
+        uint timestamp;
     }
 
     // Similar to declaring PK for adding data
-    mapping(uint => Post) public posts;
+    mapping(address => Account) public accounts;
 
-    // Emit event when a post is created
-    event PostCreated(
-        uint id,
-        string content,
-        string mediaHash,
-        uint tip,
-        address author
-    );
-
-    // Emit event when a post gets tipped
-    event PostTipped(
-        uint id,
-        string content,
-        string mediaHash,
-        uint tip,
-        address author
-    );
-
-    constructor() {
-        name = "A Decentralized Bank";
-
-        // Create a default post
-        createPost("This is a Default Post", "", 0);
+    // Pass deployed Token address as argument(which comes from migration)
+    constructor(Token _token) { 
+        token = _token;
     }
 
-    function createPost(string memory _content, string memory _mediaHash, uint _tip) public {
-        // Validation
-        require(bytes(_content).length > 0);
-        require(_tip == 0); // Initial tip amount will be 0 when you create a post
+    event acc(
+        address id,
+        uint balance
+    );
 
-        // Update counter
-        postCount ++;
+    // Similar to declaring PK in DB (address = PK(id), uint = balance table)
+    mapping(address => uint) public balance;
 
-        // Create a post
-        posts[postCount] = Post(postCount, _content, _mediaHash, _tip, msg.sender);
-
-        // Trigger an event (Similar to return)
-        emit PostCreated(postCount, _content, _mediaHash, _tip, msg.sender);
-    }
-
-    function tipPost(uint _id) public payable {
-        // Fetch post and author
-        Post memory _post = posts[_id];
-
-        // Validation
-        require(_post.id > 0 && _post.id <= postCount); // Id is valid
-        require(msg.value > 0); // There is enough ETH in transation
-        require(msg.sender != _post.author); // Reader is not the author
-
+    function deposit() payable public {
+        Account memory _account = accounts[msg.sender];
+        // Increase the balance
+        balance[msg.sender] = balance[msg.sender] + msg.value;
         // Add new tip to the post
-        _post.tip = _post.tip + msg.value;
+        _account.balance = _account.balance + msg.value;
 
         // Update the actual product in blockchain
-        posts[_id] = _post;
+        accounts[msg.sender] = _account;
 
-        // Pay the author
-        payable(_post.author).transfer(msg.value);
+        emit acc(_account.id, _account.balance);
+    }
 
-        // Trigger an event
-        emit PostTipped(postCount, _post.content, _post.mediaHash, _post.tip, _post.author);
+    function withdraw() payable public {
+
     }
 }
 

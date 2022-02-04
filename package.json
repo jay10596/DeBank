@@ -1,7 +1,7 @@
 {
     "name": "de-bank",
     "version": "0.1.0",
-    "description": "An Ethereum based social media network",
+    "description": "An DeFI Bank with ERC20 token",
     "author": "jay.modi105@gmail.com",
     "dependencies": {
         "@openzeppelin/contracts": "^4.4.2",

@@ -4,6 +4,7 @@
     "description": "An Ethereum based social media network",
     "author": "jay.modi105@gmail.com",
     "dependencies": {
+        "@openzeppelin/contracts": "^4.4.2",
         "@reduxjs/toolkit": "^1.7.1",
         "@testing-library/jest-dom": "^5.16.1",
         "@testing-library/react": "^12.1.2",

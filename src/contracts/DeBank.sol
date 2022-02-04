@@ -111,5 +111,8 @@ Extra Notes:
 
     9) What happens ofter transfering the value?
     Check the Ganache network. The msg.sender/from: buyer (3rd account) will lose 1 eth and owner (2nd account) will gain one.   
+
+    10) Why we use Wei?
+    Solidity doesn't have decimal data type. Therefore, we have to convert decimal values (actual ETH) into wei. In other words, Eth = Dollar, Wei = Cent.
 */
 

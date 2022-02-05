@@ -19,8 +19,8 @@ contract Token is ERC20 {
         minter = msg.sender;
     }
     
-    function mintToken(address account, uint amount) public {
-        // Check if msg.sender can mint
+    function mintDBC(address account, uint amount) public {
+        // Validation
         require(msg.sender == minter, "Error: msg.sender doesn't have minter role");
 
         // Default mint function from ERC20
@@ -29,10 +29,10 @@ contract Token is ERC20 {
 
     // Initially the minter will be the deployer but deployer will give his role to the bank once Smart Contract deployed
     function changeMinter(address deBank) public returns (bool) {
-        // Check if msg.sender has minter role
+        // Validation
         require(msg.sender == minter, "Error: Only deployer can change minter");
 
-        // Change minter from deployer to DeBank
+        // Update minter from deployer to DeBank
         minter = deBank;
 
         // Trigger an event

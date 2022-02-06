@@ -77,7 +77,7 @@ contract DeBank {
         payable(msg.sender).transfer(_account.balance);
 
         // Mint DBC token
-        token.mintDBC(msg.sender, interest); // Pay interest in DBC token
+        token.mintDBC(address(this), msg.sender, interest); // Pay interest in DBC token
 
         // Reset Accunt data
         _account.balance = 0;

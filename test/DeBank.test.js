@@ -12,17 +12,20 @@ require('chai')
 
 // Equivalent to [accounts[0], accounts[1], accounts[2]] 
 contract(DeBank, ([deployer, user]) => {
-    let token, deBank
+    let token, deBank, result, event
 
     before(async () => {
-        // Same steps as migration
         token = await Token.new() // Initialize token
-        deBank = await DeBank.deployed(token.address)
-
-        await token.changeMinter(deBank.address, {from: deployer})
+        deBank = await DeBank.new(token.address)
     })
 
     describe('Token', () => {
+        // Similar to constructor()
+        before(async () => {
+            result = await token.changeMinter(deBank.address, {from: deployer})
+            event = result.logs[0].args
+        })
+
         it('deployment', async () => {
             const address = await token.address
 
@@ -56,22 +59,24 @@ contract(DeBank, ([deployer, user]) => {
 
         it('has transfered minter role', async () => {
             // SUCCESS: deployer has has transfered minter role to DeBank
+            assert.equal(await event.from, deployer)
+            assert.equal(await event.to, deBank.address)
             assert.equal(await token.minter(), deBank.address)
 
             // FAILURE: deployer is not the minter anymore
-            await token.changeMinter(deBank.address, { from: deployer }).should.be.rejectedWith(utils.EVM_REVERT) // Unauthorized minter
-            // await token.mintDBC(deBank.address, user, '1', { from: deployer }).should.be.rejectedWith(utils.EVM_REVERT) 
+            await token.changeMinter(deBank.address, {from: deployer}).should.be.rejectedWith(utils.EVM_REVERT) // Unauthorized minter
+            await token.mintDBC(deployer, user, '1').should.be.rejectedWith(utils.EVM_REVERT)
         })
     })
 
     describe('DeBank', () => {
-        let result, event, block
+        let block
 
         describe('depositETH', async () => {
             // Similar to constructor()
             before(async () => {
                 // Deposite 0.01 ETH in the bank
-                result = await deBank.depositETH({value: Number(web3.utils.toWei('0.01', 'Ether')), from: user})
+                result = await deBank.depositETH({ value: Number(web3.utils.toWei('0.01', 'Ether')), from: user})
                 event = result.logs[0].args
 
                 // Get the latest block
@@ -84,7 +89,7 @@ contract(DeBank, ([deployer, user]) => {
                 assert.isTrue(Number(event.balance) > 0)
 
                 // FAILURE: Can't deposit if the amount is < 0.01 ETH
-                await deBank.depositETH({value: Number(web3.utils.toWei('0.001', 'Ether')), from: user}).should.be.rejectedWith(utils.EVM_REVERT)
+                await deBank.depositETH({ value: Number(web3.utils.toWei('0.001', 'Ether')), from: user}).should.be.rejectedWith(utils.EVM_REVERT)
             })
 
             it('timestamp has updated', async () => {
@@ -102,15 +107,14 @@ contract(DeBank, ([deployer, user]) => {
             })
         })
 
-        describe('withdrawETH', () => {   
+        describe('withdrawETH', () => {
             let account, walletBalance, dbc
-            
+
             // Similar to constructor()
             before(async () => {
                 // Fetch account data and wallet before withdraw
                 account = await deBank.accounts(user)
                 walletBalance = await web3.eth.getBalance(user)
-                token = await Token.deployed() // use the deployed token
 
                 // Withdraw previously deposited ETH from the bank
                 result = await deBank.withdrawETH({from: user})
@@ -125,7 +129,7 @@ contract(DeBank, ([deployer, user]) => {
                 assert.isTrue(Number(account.balance) > 0) // Previous balance is > 0
                 assert.equal(Number(event.balance), 0)
             })
-        
+
             it('wallet balance is increased', async () => {
                 // SUCCESS: Wallet balance is increased after receving ETH back
                 assert.isTrue(Number(await web3.eth.getBalance(user)) > Number(walletBalance)) // New wallet balance > old wallet balance
@@ -135,23 +139,84 @@ contract(DeBank, ([deployer, user]) => {
                 dbc = await token.balanceOf(user)
 
                 // SUCCESS: DBC are minted based on the interest
-                assert.isTrue(Number(dbc) > 0) 
-                assert.equal(Number(dbc), Number(event.interest))         
+                assert.isTrue(Number(dbc) > 0)
+                assert.equal(Number(dbc), Number(event.interest))
             })
-        
+
             it('reset account', async () => {
                 // SUCCESS: Account is reset after withdraw
-                assert.equal(Number(event.balance), 0) 
-                assert.equal(Number(event.timestamp), 0) 
-                assert.equal(event.balance, false) 
+                assert.equal(Number(event.balance), 0)
+                assert.equal(Number(event.timestamp), 0)
+                assert.equal(event.balance, false)
             })
-        
-            it('only user can withdraw', async () =>{
+
+            it('only user can withdraw', async () => {
                 // FAILURE: Deployer doesn't have any deposit, hence accounts(deployer).active is null 
-                await deBank.depositETH({value: Number(web3.utils.toWei('0.01', 'Ether')), from: user})
+                await deBank.depositETH({ value: Number(web3.utils.toWei('0.01', 'Ether')), from: user })
                 await utils.wait(2) // Accruing interest
-                await deBank.withdrawETH({from: deployer}).should.be.rejectedWith(utils.EVM_REVERT) // Fails because deployer doesn't have any deposit. Therefore, active is null
+                await deBank.withdrawETH({ from: deployer }).should.be.rejectedWith(utils.EVM_REVERT) // Fails because deployer doesn't have any deposit. Therefore, active is null
             })
         })
+
+        // describe('testing borrow...', () => {
+        //     describe('success', () => {
+        //         beforeEach(async () => {
+        //             await dbank.borrow({ value: 10 ** 16, from: user }) //0.01 ETH
+        //         })
+
+        //         it('token total supply should increase', async () => {
+        //             expect(Number(await token.totalSupply())).to.eq(5 * (10 ** 15)) //10**16/2
+        //         })
+
+        //         it('balance of user should increase', async () => {
+        //             expect(Number(await token.balanceOf(user))).to.eq(5 * (10 ** 15)) //10**16/2
+        //         })
+
+        //         it('collateralEther should increase', async () => {
+        //             expect(Number(await dbank.collateralEther(user))).to.eq(10 ** 16) //0.01 ETH
+        //         })
+
+        //         it('user isBorrowed status should eq true', async () => {
+        //             expect(await dbank.isBorrowed(user)).to.eq(true)
+        //         })
+        //     })
+
+        //     describe('failure', () => {
+        //         it('borrowing should be rejected', async () => {
+        //             await dbank.borrow({ value: 10 ** 15, from: user }).should.be.rejectedWith(EVM_REVERT) //to small amount
+        //         })
+        //     })
+        // })
+
+        // describe('testing payOff...', () => {
+        //     describe('success', () => {
+        //         beforeEach(async () => {
+        //             await dbank.borrow({ value: 10 ** 16, from: user }) //0.01 ETH
+        //             await token.approve(dbank.address, (5 * (10 ** 15)).toString(), { from: user })
+        //             await dbank.payOff({ from: user })
+        //         })
+
+        //         it('user token balance should eq 0', async () => {
+        //             expect(Number(await token.balanceOf(user))).to.eq(0)
+        //         })
+
+        //         it('dBank eth balance should get fee', async () => {
+        //             expect(Number(await web3.eth.getBalance(dbank.address))).to.eq(10 ** 15) //10% of 0.01 ETH
+        //         })
+
+        //         it('borrower data should be reseted', async () => {
+        //             expect(Number(await dbank.collateralEther(user))).to.eq(0)
+        //             expect(await dbank.isBorrowed(user)).to.eq(false)
+        //         })
+        //     })
+
+        //     describe('failure', () => {
+        //         it('paying off should be rejected', async () => {
+        //             await dbank.borrow({ value: 10 ** 16, from: user }) //0.01 ETH
+        //             await token.approve(dbank.address, (5 * (10 ** 15)).toString(), { from: user })
+        //             await dbank.payOff({ from: deployer }).should.be.rejectedWith(EVM_REVERT) //wrong user
+        //         })
+        //     })
+        // })
     })
 })

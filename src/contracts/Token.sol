@@ -8,7 +8,7 @@ contract Token is ERC20 {
     // State variable
     address public minter;
 
-    // Emit event when a post is created
+    // Emit event when minter is updated
     event MinterChanged(
         address indexed from,
         address to
@@ -18,17 +18,9 @@ contract Token is ERC20 {
     constructor() payable ERC20("Decentralized Bank Currency", "DBC") {
         minter = msg.sender;
     }
-    
-    function mintDBC(address account, uint amount) public {
-        // Validation
-        require(msg.sender == minter, "Error: msg.sender doesn't have minter role");
-
-        // Default mint function from ERC20
-        _mint(account, amount);
-    }
 
     // Initially the minter will be the deployer but deployer will give his role to the bank once Smart Contract deployed
-    function changeMinter(address deBank) public returns (bool) {
+    function changeMinter(address deBank) public {
         // Validation
         require(msg.sender == minter, "Error: Only deployer can change minter");
 
@@ -37,7 +29,13 @@ contract Token is ERC20 {
 
         // Trigger an event
         emit MinterChanged(msg.sender, deBank);
+    }
+    
+    function mintDBC(address deBank, address account, uint amount) public {
+        // Validation
+        require(deBank == minter, "Error: DeBank doesn't have minter role");
 
-        return true;
+        // Default mint function from ERC20
+        _mint(account, amount);
     }
 }

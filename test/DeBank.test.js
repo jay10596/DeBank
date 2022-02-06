@@ -229,8 +229,10 @@ contract(DeBank, ([deployer, user]) => {
                 account = await deBank.accounts(user)
                 oldBalanceDBC = Number(await token.balanceOf(user)) // DBC balance of the user - 5000000063419582
 
-                // Return borrowed DBC to the bank
+                // Token receiver needs to be approved before receiving any token (except when you mint)
                 await token.approve(deBank.address, Number(web3.utils.toWei('0.01', 'Ether')) / 2, { from: user })
+                
+                // Return borrowed DBC to the deBank
                 result = await deBank.returnDBC({ from: user })
                 event = result.logs[0].args
 

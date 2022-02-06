@@ -141,6 +141,8 @@ contract DeBank {
 
         // Validation
         require(_account.isBorrowed == true, "Error: You don't have any active loan");
+
+        // Transfer token from msg.sender to deBank (transferFrom returns bool, that's it's added within require for extra validation)
         require(token.transferFrom(msg.sender, address(this), _account.collateral / 2), "Error: Can't receive DBC"); // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
 
         // Calculate collateral fee (10%)
@@ -160,20 +162,19 @@ contract DeBank {
 
 /*
 Extra Notes:
-    1) Basic application
-    The contract is deployed by the deployer
-    Once it's deployed, the ownership of the Token has been transfered to the DeBank right away
-    Why? Because onlt DeBank should Mint new coins
-    A user can deposit Eth (minimum 0.01)
-    DeBank will calculate interest per second
-    On withdraw, user will get back his dposit (ETH) and the earned interest will be paid in DBC
-    A user can borrow DBC but has to put ETH as collateral
-    He can borrow 50% DBC of collateral ETH amount
-    He can return the debt
-    DeBank will take his 10% fee on collateral amount and pay back the rest
+    1) Application logic
+    Conditions:
+        The contract is deployed by the deployer
+        Once it's deployed, the ownership of the Token has been transfered to the DeBank right away
+        Why? Because onlt DeBank should Mint new coins
+        A user can deposit Eth (minimum 0.01)
+        DeBank will calculate interest per second
+        On withdraw, user will get back his dposit (ETH) and the earned interest will be paid in DBC
+        A user can borrow DBC but has to put ETH as collateral
+        He can borrow 50% DBC of collateral ETH amount
+        He can return the debt
+        DeBank will take his 10% fee on collateral amount and pay back the rest
 
-    
-    
     2) How to calculate interest?
     interest = interestPerSecond * period
         

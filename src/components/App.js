@@ -1,8 +1,9 @@
 import React, { useEffect }  from 'react';
 import Web3 from 'web3';
-import SocialMedia from '../build/SocialMedia.json';
+import DeBank from '../build/DeBank.json';
+import Token from '../build/Token.json';
 import { useDispatch, useSelector } from 'react-redux';
-import { setSocialMedia } from '../helpers/reducers/SocialMedia'
+import { setDeBank } from '../helpers/reducers/DeBank'
 import Router from '../helpers/router';
 
 import Header from './sections/Header';
@@ -12,13 +13,13 @@ import Footer from './sections/Footer';
 // Can't use Redux hooks in a class component
 function App() {    
     const dispatch = useDispatch()
+    const deBank = useSelector((state) => state.deBank.value)
     const theme = useSelector((state) => state.theme)
-    const socialMedia = useSelector((state) => state.socialMedia.value)
 
     // Equivalent to componentWillMount()
     useEffect(() => {
         loadWeb3()
-        loadBlockchainData()
+        loadBlockchain()
     })
 
     const loadWeb3 = async () => {
@@ -37,39 +38,43 @@ function App() {
         }
     }
 
-    const loadBlockchainData = async () => {
-        const account = await window.web3.eth.getAccounts() /* Use await while calling a function */
-        const netId = await window.web3.eth.net.getId()
-
-        // Check if smart contract is deployed to correct network(Ganache) 
-        if(SocialMedia.networks[netId]) {
-            const socialMedia = new window.web3.eth.Contract(SocialMedia.abi, SocialMedia.networks[netId].address)
-
-            const postCount = await socialMedia.methods.postCount().call() /* https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#id26 */
-            const posts = []
-
-            for(var i = 1; i <= postCount; i++) {
-                const post = await socialMedia.methods.posts(i).call()
-                posts.push(post)
-            }
-
-            dispatch(setSocialMedia({ 
-                account: account[0],
-                socialMedia: socialMedia,
-                postCount: postCount,
-                posts: posts,
-                loading: false
-            }))
+    const loadBlockchain = async () => {
+        if(typeof window.ethereum == 'undefined') {
+            window.alert('Please install MetaMask')
         } else {
-            window.alert('Smart contract not deployed to detected network')
-        }
+            const web3 = new Web3(window.ethereum) // Anything to do with web3 is related to MetaMask such as gettting balance
+            const netId = await web3.eth.net.getId() // Network ID - eg: Kovan, Ganache etc.
+            const account = await web3.eth.getAccounts() // Current logged in account - eg: ['0xji2817s82hs']
+            
+            if(typeof account[0] == 'undefined') {
+                window.alert('Please login with MetaMask')
+            } else {
+                const token = new window.web3.eth.Contract(Token.abi, Token.networks[netId].address)
+                const deBank = new window.web3.eth.Contract(DeBank.abi, DeBank.networks[netId].address)
+    
+                dispatch(setDeBank({ 
+                    user: {
+                        address: account[0],
+                        eth: await web3.eth.getBalance(account[0]),
+                        dbc: await token.methods.balanceOf(account[0]).call() /* https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#id26 */
+                    },
+                    deBank: {
+                        contract: deBank,
+                        address: deBank._address,
+                        eth: await web3.eth.getBalance(deBank._address),
+                        dbc: await token.methods.totalSupply().call()  // Total minted DBC
+                    },
+                    loading: false
+                }))
+            }
+        }        
     }
 
     return (
         <div className="App" >
-            <Header account={socialMedia.account} themeColor={theme.color} />
+            <Header user={deBank.user} theme={theme} />
 
-            {socialMedia.loading 
+            {deBank.loading 
                 ? <Loading />
                 : <Router />                    
             }
@@ -80,3 +85,13 @@ function App() {
 }
 
 export default App;
+
+
+
+/*
+Extra Notes:
+    1) Why token.methods.balanceOf(address).call()
+    In test, we can directly use 'token.balanceOf(account[0])' without methods because token is imported directly via Smart Contract.
+    Here, token is imported via build json in which all these methods are under 'methods: {...}'. Hence, 'token.methods.balanceOf(account[0]).call()'.
+    Read: https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#id26
+*/

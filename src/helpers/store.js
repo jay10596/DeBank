@@ -2,12 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 import thunk from 'redux-thunk';
 
 import themeReducer from "./reducers/Theme";
-import socialMediaReducer from "./reducers/SocialMedia";
+import deBankReducer from "./reducers/DeBank";
 
 const Store = configureStore({
     reducer: {
         theme: themeReducer,
-        socialMedia: socialMediaReducer
+        deBank: deBankReducer
     },
     middleware: [thunk]
 })

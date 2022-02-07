@@ -1,17 +1,14 @@
 import React from 'react';
 
 import Banner from '../sections/Banner';
-import PostForm from '../sections/PostForm';
-import PostList from '../sections/PostList';
+import DepositForm from '../sections/DepositForm';
 
 function Home() {
     return (
         <main>
             <Banner />
 
-            <PostForm />
-
-            <PostList />
+            <DepositForm />
         </main>
     );
 }

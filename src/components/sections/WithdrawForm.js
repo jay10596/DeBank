@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { createPost } from '../../helpers/reducers/SocialMedia';
+import { createPost } from '../../helpers/reducers/DeBank';
 import { create } from 'ipfs-http-client';
 
 import SectionHeader from '../reusables/SectionHeader';
@@ -29,17 +29,12 @@ function PostForm() {
 
     return (
         <section>
-            <SectionHeader heading="Create a post" />
+            <SectionHeader heading="How much you want to deposit?" />
 
             <form onSubmit={handleSubmit}>
                 <label>
                     content:
                     <input type="textarea" name="name" value={content} onChange={updateContent} />
-                </label>
-
-                <label>
-                    File Upload:
-                    <input type="file" name="media" onChange={updateMedia} />
                 </label>
 
                 <input type="submit" value="Submit" />

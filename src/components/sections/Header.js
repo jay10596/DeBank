@@ -8,11 +8,16 @@ const Header = (props) => {
 
     return (
         <header>
-            {props.account}
-            <Link to="/posts">Posts</Link>
+            <ul>
+                User:
+                <li>Address: {props.user.address}</li>
+                <li>ETH: {props.user.eth}</li>
+                <li>DBC: {props.user.dbc}</li>
+            </ul>
+
             <Link to="/about">About</Link>
 
-            <button onClick={() => dispatch(setTheme({color: props.themeColor === 'light' ? 'dark' : 'light'}))}>
+            <button onClick={() => dispatch(setTheme({color: props.theme.color === 'light' ? 'dark' : 'light'}))}>
                 {props.themeColor}
             </button>
         </header>

@@ -117,7 +117,7 @@ contract DeBank {
         require(_account.isBorrowed == false, "Error: Loan is already taken");
 
         // Lock ETH as collateral till the loan is paid off
-        _account.collateral = _account.collateral + msg.value;
+        _account.collateral = msg.value;
 
         // Calculate DBC to mint (50% of collateral)
         uint loan = _account.collateral / 2;

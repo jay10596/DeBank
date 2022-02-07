@@ -1,26 +1,26 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { withdrawETH } from '../../helpers/reducers/DeBank';
+import { returnDBC } from '../../helpers/reducers/DeBank';
 
 import SectionHeader from '../reusables/SectionHeader';
 
-function WithdrawForm() {
+function ReturnForm() {
     const dispatch = useDispatch()
 
     // On click
     function handleSubmit() {
-        dispatch(withdrawETH())
+        dispatch(returnDBC())
     }
 
     return (
         <section>
-            <SectionHeader heading="Withdraw Form" />
+            <SectionHeader heading="Return Form" />
 
-            <h4>Are you sure you want to withdraw ETH and gain DBC?</h4>
+            <h4>Are you sure you want to return DBC and get back ETH (- 10% fee)?</h4>
 
             <button onClick={handleSubmit}>Withdraw Now</button>
         </section>
     );
 }
 
-export default WithdrawForm;
+export default ReturnForm;

@@ -34,17 +34,29 @@ const deBankSlice = createSlice({
         withdrawETH: (state, action) => {
             state.value.loading = true
 
-            state.value.socialMedia.methods.tipPost(action.payload.id)
-                .send({ from: state.value.account, value: action.payload.tip })
+            state.value.deBank.contract.methods.withdrawETH()
+                .send({ from: state.value.user.address })
                 .on('receipt', (receipt) => {
                     state.value.loading = false
                 })
         },
         borrowDBC: (state, action) => {
+            state.value.loading = true
 
+            state.value.deBank.contract.methods.borrowDBC()
+                .send({ from: state.value.user.address, value: action.payload.amount })
+                .on('receipt', (receipt) => {
+                    state.value.loading = false
+                })
         },
         returnDBC: (state, action) => {
-            
+            state.value.loading = true
+
+            state.value.deBank.contract.methods.returnDBC()
+                .send({ from: state.value.user.address })
+                .on('receipt', (receipt) => {
+                    state.value.loading = false
+                })
         }
     }
 })

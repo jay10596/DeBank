@@ -5,6 +5,7 @@ const deBankSlice = createSlice({
     initialState: {
         value: {
             user: {
+                account: null,
                 address: null,
                 eth: 0,
                 dbc: 0
@@ -14,6 +15,9 @@ const deBankSlice = createSlice({
                 address: null,
                 eth: 0,
                 dbc: 0 // Total minted DBC
+            },
+            token: {
+                contract:[]
             },
             loading: false
         }
@@ -51,6 +55,10 @@ const deBankSlice = createSlice({
         },
         returnDBC: (state, action) => {
             state.value.loading = true
+
+            // Approve DBC transaction
+            const borrowedDBC = state.value.user.account.collateral / 2
+            state.value.token.contract.methods.approve(state.value.deBank.address, borrowedDBC.toString()).send({from: state.value.user.address})
 
             state.value.deBank.contract.methods.returnDBC()
                 .send({ from: state.value.user.address })

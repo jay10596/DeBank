@@ -155,6 +155,9 @@ contract DeBank {
         _account.collateral = 0;
         _account.isBorrowed = false;
 
+        // Update the actual account in blockchain
+        accounts[msg.sender] = _account;
+
         // Trigger an event
         emit ReturnedDBC(msg.sender, _account.collateral, _account.isBorrowed, fee);
     }

@@ -18,7 +18,7 @@ function ReturnForm() {
 
             <h4>Are you sure you want to return DBC and get back ETH (- 10% fee)?</h4>
 
-            <button onClick={handleSubmit}>Withdraw Now</button>
+            <button onClick={handleSubmit}>Return Now</button>
         </section>
     );
 }

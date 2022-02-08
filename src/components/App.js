@@ -54,6 +54,7 @@ function App() {
     
                 dispatch(setDeBank({ 
                     user: {
+                        account: await deBank.methods.accounts(account[0]).call(), // Account data in DeBank
                         address: account[0],
                         eth: await web3.eth.getBalance(account[0]),
                         dbc: await token.methods.balanceOf(account[0]).call() /* https://web3js.readthedocs.io/en/v1.2.11/web3-eth-contract.html#id26 */
@@ -63,6 +64,9 @@ function App() {
                         address: deBank._address,
                         eth: await web3.eth.getBalance(deBank._address),
                         dbc: await token.methods.totalSupply().call()  // Total minted DBC
+                    },
+                    token: {
+                        contract: token
                     },
                     loading: false
                 }))

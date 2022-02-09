@@ -9,9 +9,6 @@ import ReturnForm from '../sections/ReturnForm';
 function Forms() {
     const user = useSelector((state) => state.deBank.value.user)
 
-    if(user.account) {
-        console.log(user.account)
-    }
     return (
         <div>
             {user.account && user.account.isDeposited

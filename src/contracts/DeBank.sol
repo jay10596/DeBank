@@ -142,8 +142,8 @@ contract DeBank {
         // Validation
         require(_account.isBorrowed == true, "Error: You don't have any active loan");
 
-        // Transfer token from msg.sender to deBank (transferFrom returns bool, that's it's added within require for extra validation)
-        require(token.transferFrom(msg.sender, address(this), _account.collateral / 2), "Error: Can't receive DBC"); // https://ethereum.org/en/developers/docs/standards/tokens/erc-20/
+        // Transfer token from msg.sender to deBank
+        token.transferFrom(msg.sender, address(this), _account.collateral / 2);
 
         // Calculate collateral fee (10%)
         uint fee = _account.collateral / 10;
@@ -162,6 +162,8 @@ contract DeBank {
         emit ReturnedDBC(msg.sender, _account.collateral, _account.isBorrowed, fee);
     }
 }
+
+
 
 /*
 Extra Notes:

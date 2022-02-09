@@ -53,12 +53,19 @@ const deBankSlice = createSlice({
                     state.value.loading = false
                 })
         },
-        returnDBC: (state, action) => {
+        approveDBC: (state, action) => {
             state.value.loading = true
 
-            // Approve DBC transaction
             const borrowedDBC = state.value.user.account.collateral / 2
-            state.value.token.contract.methods.approve(state.value.deBank.address, borrowedDBC.toString()).send({from: state.value.user.address})
+
+            state.value.token.contract.methods.approve(state.value.deBank.address, borrowedDBC.toString())
+                .send({from: state.value.user.address})
+                .on('receipt', (receipt) => {
+                    state.value.loading = false
+                })
+        },
+        returnDBC: (state, action) => {
+            state.value.loading = true
 
             state.value.deBank.contract.methods.returnDBC()
                 .send({ from: state.value.user.address })
@@ -69,6 +76,6 @@ const deBankSlice = createSlice({
     }
 })
 
-export const { setDeBank, depositETH, withdrawETH, borrowDBC, returnDBC } = deBankSlice.actions;
+export const { setDeBank, depositETH, withdrawETH, borrowDBC, approveDBC, returnDBC } = deBankSlice.actions;
 
 export default deBankSlice.reducer;
